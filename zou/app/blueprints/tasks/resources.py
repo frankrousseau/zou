@@ -45,13 +45,13 @@ class CommentTaskResource(Resource):
                 object_id=task_id,
                 object_type="Task",
                 task_status_id=task_status_id,
-                person_id=persons_service.get_current_user().id,
+                person_id=person["id"],
                 text=comment
             )
             task.update({"task_status_id": task_status_id})
             comment_dict = comment.serialize()
             comment_dict["task_status"] = task_status.serialize()
-            comment_dict["person"] = person.serialize()
+            comment_dict["person"] = person
             events.emit("comment:new", {"id": comment_dict["id"]})
         except TaskStatusNotFoundException:
             abort(400)
@@ -347,9 +347,7 @@ class TasksAssignResource(Resource):
         )
 
     def assign_task(self, task_id, person_id):
-        task = tasks_service.get_task(task_id)
-        person = persons_service.get_person(person_id)
-        return tasks_service.assign_task(task, person)
+        return tasks_service.assign_task(task_id, person_id)
 
 
 class TaskAssignResource(Resource):
@@ -384,9 +382,7 @@ class TaskAssignResource(Resource):
         )
 
     def assign_task(self, task_id, person_id):
-        task = tasks_service.get_task(task_id)
-        person = persons_service.get_person(person_id)
-        return tasks_service.assign_task(task, person)
+        return tasks_service.assign_task(task_id, person_id)
 
 
 class TaskFullResource(Resource):
@@ -406,7 +402,7 @@ class TaskFullResource(Resource):
         task_type = tasks_service.get_task_type(task.task_type_id)
         result["task_type"] = task_type
         assigner = persons_service.get_person(task.assigner_id)
-        result["assigner"] = assigner.serialize()
+        result["assigner"] = assigner
         project = projects_service.get_project(task.project_id)
         result["project"] = project.serialize()
         task_status = tasks_service.get_task_status(task.task_status_id)
