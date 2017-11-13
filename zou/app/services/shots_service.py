@@ -129,12 +129,20 @@ def get_shot_map(criterions={}):
         shot_id = str(shot.id)
         episode_name = ""
         episode = episode_map.get(sequence_parent_id, None)
+
         if episode is not None:
             episode_name = episode.name
+
+        if shot.preview_file_id is not None:
+            preview_file_id = str(shot.preview_file_id)
+        else:
+            preview_file_id = ""
+
         shot_map[shot_id] = {
             "id": str(shot.id),
             "name": shot.name,
             "description": shot.description,
+            "preview_file_id": preview_file_id,
             "sequence_id": str(shot.parent_id),
             "sequence_name": sequence_name,
             "episode_id": str(sequence_parent_id),
@@ -275,7 +283,6 @@ def get_or_create_episode(project, name):
             name=name
         )
         episode.save()
-
     return episode
 
 
@@ -295,7 +302,6 @@ def get_or_create_sequence(project, episode, name):
             name=name
         )
         sequence.save()
-
     return sequence
 
 
@@ -332,3 +338,64 @@ def remove_shot(shot_id):
     deleted_shot = shot.serialize(obj_type="Shot")
     events.emit("shot:deletion", {"deleted_shot": deleted_shot})
     return deleted_shot
+
+
+def create_episode(project_id, name):
+    episode_type = get_episode_type()
+    episode = Entity.get_by(
+        entity_type_id=episode_type.id,
+        project_id=project_id,
+        name=name
+    )
+    if episode is None:
+        episode = Entity.create(
+            entity_type_id=episode_type.id,
+            project_id=project_id,
+            name=name
+        )
+    return episode.serialize(obj_type="Episode")
+
+
+def create_sequence(project_id, episode_id, name):
+    sequence_type = get_sequence_type()
+
+    if episode_id is not None:
+        get_episode(episode_id)  # raises EpisodeNotFound if it fails.
+
+    sequence = Entity.get_by(
+        entity_type_id=sequence_type.id,
+        parent_id=episode_id,
+        project_id=project_id,
+        name=name
+    )
+    if sequence is None:
+        sequence = Entity.create(
+            entity_type_id=sequence_type.id,
+            project_id=project_id,
+            parent_id=episode_id,
+            name=name
+        )
+    return sequence.serialize(obj_type="Sequence")
+
+
+def create_shot(project_id, sequence_id, name):
+    shot_type = get_shot_type()
+
+    if sequence_id is not None:
+        get_sequence(sequence_id)  # raises SequenceNotFound if it fails.
+
+    shot = Entity.get_by(
+        entity_type_id=shot_type.id,
+        parent_id=sequence_id,
+        project_id=project_id,
+        name=name
+    )
+    if shot is None:
+        shot = Entity.create(
+            entity_type_id=shot_type.id,
+            project_id=project_id,
+            parent_id=sequence_id,
+            name=name,
+            data={}
+        )
+    return shot.serialize(obj_type="Shot")

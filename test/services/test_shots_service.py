@@ -51,6 +51,15 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.sequence.serialize()
         )
 
+    def test_get_episode_map(self):
+        self.generate_fixture_episode("E02")
+        episode_map = shots_service.get_episode_map()
+        self.assertEquals(len(episode_map.keys()), 2)
+        self.assertEquals(
+            episode_map[self.episode.id].name,
+            self.episode.name
+        )
+
     def test_get_shot_map(self):
         self.generate_fixture_shot("P02")
         shot_map = shots_service.get_shot_map()
@@ -76,6 +85,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.generate_fixture_shot_task()
         self.generate_fixture_shot_task(name="Secondary")
         self.generate_fixture_shot("P02")
+
         shots = shots_service.get_shots_and_tasks()
         shots = sorted(shots, key=lambda s: s["name"])
         self.assertEqual(len(shots), 2)
@@ -90,6 +100,7 @@ class ShotUtilsTestCase(ApiDBTestCase):
         self.assertEqual(
             shots[0]["tasks"][0]["assignees"][0], str(self.person.id)
         )
+        self.assertEqual(shots[0]["episode_name"], "E01")
 
     def test_is_shot(self):
         self.assertTrue(shots_service.is_shot(self.shot))
@@ -113,3 +124,33 @@ class ShotUtilsTestCase(ApiDBTestCase):
             self.episode.id,
             shots_service.get_episode(self.episode.id).id
         )
+
+    def test_create_episode(self):
+        episode_name = "NE01"
+        episode = shots_service.create_episode(
+            self.project.id,
+            episode_name
+        )
+        self.assertEquals(episode["name"], episode_name)
+
+    def test_create_sequence(self):
+        sequence_name = "NSE01"
+        parent_id = str(self.episode.id)
+        sequence = shots_service.create_sequence(
+            self.project.id,
+            parent_id,
+            sequence_name
+        )
+        self.assertEquals(sequence["name"], sequence_name)
+        self.assertEquals(sequence["parent_id"], parent_id)
+
+    def test_create_shot(self):
+        shot_name = "NSH01"
+        parent_id = str(self.sequence.id)
+        shot = shots_service.create_shot(
+            self.project.id,
+            parent_id,
+            shot_name
+        )
+        self.assertEquals(shot["name"], shot_name)
+        self.assertEquals(shot["parent_id"], parent_id)
