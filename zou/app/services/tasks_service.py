@@ -24,6 +24,7 @@ from zou.app.services.exception import (
     TaskNotFoundException,
     TaskStatusNotFoundException,
     TaskTypeNotFoundException,
+    DepartmentNotFoundException,
     WrongDateFormatException
 )
 
@@ -130,7 +131,7 @@ def get_task(task_id):
     return get_task_raw(task_id).serialize()
 
 
-def get_task_type(task_type_id):
+def get_task_type_raw(task_type_id):
     try:
         task_type = TaskType.get(task_type_id)
     except StatementError:
@@ -139,7 +140,11 @@ def get_task_type(task_type_id):
     if task_type is None:
         raise TaskTypeNotFoundException()
 
-    return task_type.serialize()
+    return task_type
+
+
+def get_task_type(task_type_id):
+    return get_task_type_raw(task_type_id).serialize()
 
 
 def create_task(task_type, entity, name="main"):
@@ -202,10 +207,6 @@ def assign_task(task_id, person_id):
     return task.serialize()
 
 
-def get_department_from_task_type(task_type):
-    return Department.get(task_type.department_id)
-
-
 def get_tasks_for_shot(shot_id):
     shot = shots_service.get_shot(shot_id)
     return get_task_dicts_for_entity(shot["id"])
@@ -216,9 +217,27 @@ def get_tasks_for_sequence(sequence_id):
     return get_task_dicts_for_entity(sequence["id"])
 
 
+def get_department(department_id):
+    try:
+        department = Department.get(department_id)
+    except StatementError:
+        raise DepartmentNotFoundException()
+
+    if department is None:
+        raise DepartmentNotFoundException()
+
+    return department.serialize()
+
+
+def get_department_from_task(task_id):
+    task = get_task_raw(task_id)
+    task_type = get_task_type_raw(task.task_type_id)
+    return get_department(task_type.department_id)
+
+
 def get_tasks_for_asset(asset_id):
     asset = assets_service.get_asset_raw(asset_id)
-    return get_task_dicts_for_entity(asset["id"])
+    return get_task_dicts_for_entity(asset.id)
 
 
 def get_task_dicts_for_entity(entity_id):
