@@ -28,3 +28,24 @@ tests:python:
     - PYTHONPATH=. py.test
   tags:
     - test
+
+deploy:python:
+  stage: deploy
+  image: python:3
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+  script:
+    - git clone http://integration.bot:looklook@gitlab.unit.local/unit-image/ansible-playbooks.git
+    - pip install ansible
+    - cd ansible-playbooks
+    - ansible-playbook -i hosts zou-update-staging.yml
+  tags:
+    - test
+  only:
+    - staging
+
