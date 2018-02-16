@@ -1,5 +1,6 @@
 stages:
   - test
+  - deploy
 
 tests:python:
   stage: test
@@ -11,6 +12,7 @@ tests:python:
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: mysecretpassword
     DB_HOST: postgres
+    MAIL_DEBUG: 1
   script:
     # Update
     - apt update
@@ -26,6 +28,13 @@ tests:python:
 
     # Run Tests
     - PYTHONPATH=. py.test
+  only:
+    - pushes
+  except:
+    refs:
+      - staging
+      - master
+      - tags
   tags:
     - test
 
@@ -40,12 +49,31 @@ deploy:python:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
   script:
-    - git clone http://integration.bot:looklook@gitlab.unit.local/unit-image/ansible-playbooks.git
+    - git clone  --depth 1 --single-branch -b staging http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.unit.local/devops/ansible-playbooks.git
     - pip install ansible
     - cd ansible-playbooks
     - ansible-playbook -i hosts zou-update-staging.yml
   tags:
     - test
   only:
-    - staging
+    - staging@unit-image/zou
 
+deploy:
+  stage: deploy
+  image: python:3
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+  script:
+    - git clone  --depth 1 --single-branch -b master http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.unit.local/devops/ansible-playbooks.git
+    - pip install ansible
+    - cd ansible-playbooks
+    - ansible-playbook -i hosts zou-update.yml
+  tags:
+    - test
+  only:
+    - master@unit-image/zou
