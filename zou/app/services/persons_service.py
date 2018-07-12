@@ -27,6 +27,13 @@ def clear_person_cache():
     cache.cache.delete_memoized(get_person_by_desktop_login)
 
 
+def clear_person_cache():
+    cache.cache.delete_memoized(get_person)
+    cache.cache.delete_memoized(get_person_by_email)
+    cache.cache.delete_memoized(get_person_by_email_username)
+    cache.cache.delete_memoized(get_person_by_desktop_login)
+
+
 def get_persons():
     """
     Return all person stored in database.
