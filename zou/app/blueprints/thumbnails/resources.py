@@ -266,13 +266,8 @@ class BasePreviewPictureResource(Resource):
             abort(403)
 
         try:
-            return Response(
-                stream_with_context(
-                    file_store.open_picture(
-                        self.picture_type,
-                        instance_id
-                    )
-                ),
+            return send_file(
+                file_store.open_picture(self.picture_type, instance_id),
                 mimetype="image/png"
             )
         except FileNotFound:
@@ -369,13 +364,9 @@ class BasePictureResource(Resource):
 
         try:
             return send_file(
-                file_store.open_picture(
-                    "thumbnails",
-                    instance_id
-                ),
+                file_store.open_picture("thumbnails", instance_id),
                 mimetype="image/png"
             )
-
         except FileNotFound:
             current_app.logger.error("File was not found for: %s" % instance_id)
             abort(404)

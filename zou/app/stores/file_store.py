@@ -1,6 +1,7 @@
 import os
 import io
 import flask_fs as fs
+from flask_fs.errors import FileNotFound
 
 from flask_fs.backends.local import LocalBackend
 from flask_fs.backends.swift import SwiftBackend
@@ -55,10 +56,13 @@ def make_key(prefix, id):
 
 
 def make_read_generator(bucket, key):
-    def read_generator():
-        for chunk in io.BytesIO(bucket.read(key)):
+    read_stream = bucket.read(key)
+
+    def read_generator(read_stream):
+        for chunk in io.BytesIO(read_stream):
             yield chunk
-    return read_generator()
+
+    return read_generator(read_stream)
 
 
 def make_storage(bucket):
