@@ -49,14 +49,6 @@ LocalBackend.read = read
 LocalBackend.path = path
 SwiftBackend.__init__ = init_swift
 
-pictures = fs.Storage("pictures", overwrite=True)
-movies = fs.Storage("movies", overwrite=True)
-files = fs.Storage("files", overwrite=True)
-
-pictures.configure(app)
-movies.configure(app)
-files.configure(app)
-
 
 def make_key(prefix, id):
     return "%s-%s" % (prefix, id)
@@ -67,6 +59,22 @@ def make_read_generator(bucket, key):
         for chunk in io.BytesIO(bucket.read(key)):
             yield chunk
     return read_generator()
+
+
+def make_storage(bucket):
+    return fs.Storage(
+        "%s%s" % (bucket, app.config.get("FS_PREFIX", "")),
+        overwrite=True
+    )
+
+
+pictures = make_storage("pictures")
+movies = make_storage("movies")
+files = make_storage("files")
+
+pictures.configure(app)
+movies.configure(app)
+files.configure(app)
 
 
 def add_picture(prefix, id, path):
