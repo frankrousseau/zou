@@ -188,19 +188,19 @@ class LoginResource(Resource):
             user = auth_service.check_auth(app, email, password)
             del user["password"]
 
-            if password == "default":
-                token = uuid.uuid4()
-                auth_tokens_store.add(
-                    "reset-%s" % token,
-                    email,
-                    ttl=3600 * 2
-                )
-                current_app.logger.info("User must change his password.")
-                return {
-                    "login": False,
-                    "default_password": True,
-                    "token": str(token)
-                }, 400
+            # if password == "default":
+            #     token = uuid.uuid4()
+            #     auth_tokens_store.add(
+            #         "reset-%s" % token,
+            #         email,
+            #         ttl=3600 * 2
+            #     )
+            #     current_app.logger.info("User must change his password.")
+            #     return {
+            #         "login": False,
+            #         "default_password": True,
+            #         "token": str(token)
+            #     }, 400
 
             access_token = create_access_token(identity=user["email"])
             refresh_token = create_refresh_token(identity=user["email"])
