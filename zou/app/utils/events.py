@@ -69,7 +69,14 @@ def emit(event, data={}, persist=True):
             from zou.app.stores.queue_store.job_queue import enqueue
             enqueue(func.handle_event, data)
         else:
-            func.handle_event(data)
+            try:
+                func.handle_event(data)
+            except Exception:
+                import traceback
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error("Error handling event \n{}"
+                             .format(traceback.format_exc()))
 
 
 def save_event(event, data):

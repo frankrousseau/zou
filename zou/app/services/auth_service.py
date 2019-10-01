@@ -92,6 +92,7 @@ def no_password_auth_strategy(email):
     If no password auth strategy is configured, it just checks that given email
     matches an user in the database.
     """
+
     try:
         person = persons_service.get_person_by_email(email)
     except PersonNotFoundException:

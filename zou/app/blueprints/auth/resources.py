@@ -131,7 +131,8 @@ class AuthenticatedResource(Resource):
     def get(self):
         try:
             person = persons_service.get_person_by_email(get_jwt_identity())
-            del person["password"]
+            # UNIT PATCH, PASSWORD REMOVED
+            # del person["password"]
             organisation = persons_service.get_organisation()
             return {
                 "authenticated": True,
@@ -186,7 +187,8 @@ class LoginResource(Resource):
         (email, password) = self.get_arguments()
         try:
             user = auth_service.check_auth(app, email, password)
-            del user["password"]
+            # UNIT PATCH: We deleted password earlier
+            # del user["password"]
 
             password_used = (
                 app.config["AUTH_STRATEGY"] != "auth_local_no_password"
