@@ -84,7 +84,7 @@ class PersonServiceTestCase(ApiDBTestCase):
     def test_create_person(self):
         person = persons_service.create_person(
             "john.doe2@gmail.com",
-            auth.encrypt_password("passwordhash"),
+            auth.encrypt_password("passwordhash").decode(),
             "John",
             "Doe"
         )
@@ -93,7 +93,7 @@ class PersonServiceTestCase(ApiDBTestCase):
 
         person = persons_service.create_person(
             " john.doe3@gmail.com \n",
-            auth.encrypt_password("passwordhash"),
+            auth.encrypt_password("passwordhash").decode(),
             "John",
             "Doe"
         )

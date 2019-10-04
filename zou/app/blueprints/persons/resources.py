@@ -24,7 +24,7 @@ class NewPersonResource(Resource):
         data = self.get_arguments()
         person = persons_service.create_person(
             data["email"],
-            auth.encrypt_password("default"),
+            auth.encrypt_password("default").decode(),
             data["first_name"],
             data["last_name"],
             data["phone"],

@@ -13,21 +13,17 @@ tests:python:
     POSTGRES_PASSWORD: mysecretpassword
     DB_HOST: postgres
     MAIL_DEBUG: 1
+    AUTH_STRATEGY: auth_local_no_password
+    PREVIEW_FOLDER: ./data
   script:
-    # Update
-    - apt update
-    - wget http://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2016.8.1_all.deb
-    - dpkg -i deb-multimedia-keyring_2016.8.1_all.deb
-    - echo "deb http://www.deb-multimedia.org stretch main non-free" | tee -a /etc/apt/sources.list
-    - apt update
-    - apt install -y python-dev libpq-dev
-    - apt install -y --force-yes ffmpeg
+    # Create thumbnail folder
+    - mkdir -p $PREVIEW_FOLDER
 
     # Install requirements
     - pip install -r requirements.txt
 
     # Run Tests
-    - PYTHONPATH=. py.test
+    - PYTHONPATH=. py.test --ignore=tests/auth --ignore=tests/services/test_auth_service.py
   only:
     - pushes
   except:
@@ -37,43 +33,3 @@ tests:python:
       - tags
   tags:
     - test
-
-deploy:python:
-  stage: deploy
-  image: python:3
-  before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
-  script:
-    - git clone  --depth 1 --single-branch -b staging http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.unit.local/devops/ansible-playbooks.git
-    - pip install ansible
-    - cd ansible-playbooks
-    - ansible-playbook -i hosts zou-update-staging.yml
-  tags:
-    - test
-  only:
-    - staging@unit-image/zou
-
-deploy:
-  stage: deploy
-  image: python:3
-  before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
-  script:
-    - git clone  --depth 1 --single-branch -b master http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.unit.local/devops/ansible-playbooks.git
-    - pip install ansible
-    - cd ansible-playbooks
-    - ansible-playbook -i hosts zou-update.yml
-  tags:
-    - test
-  only:
-    - master@unit-image/zou

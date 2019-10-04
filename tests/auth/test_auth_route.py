@@ -14,7 +14,7 @@ class AuthTestCase(ApiDBTestCase):
 
         self.generate_fixture_person()
         self.person.update({
-            "password": auth.encrypt_password("secretpassword"),
+            "password": auth.encrypt_password("secretpassword").decode(),
             "role": "admin"
         })
 
@@ -261,7 +261,7 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_default_password(self):
         self.person.update({
-            "password": auth.encrypt_password("default"),
+            "password": auth.encrypt_password("default").decode(),
         })
         self.credentials["password"] = "default"
         response = self.post("auth/login", self.credentials, 400)

@@ -477,7 +477,7 @@ class ApiDBTestCase(ApiTestCase):
             last_name="Did",
             role="admin",
             email=u"john.did@gmail.com",
-            password=auth.encrypt_password("mypassword")
+            password=auth.encrypt_password("mypassword").decode()
         ).serialize()
         return self.user
 
@@ -487,7 +487,7 @@ class ApiDBTestCase(ApiTestCase):
             last_name="Did2",
             role="manager",
             email=u"john.did.manager@gmail.com",
-            password=auth.encrypt_password("mypassword")
+            password=auth.encrypt_password("mypassword").decode()
         ).serialize()
         return self.user_manager
 
@@ -497,7 +497,7 @@ class ApiDBTestCase(ApiTestCase):
             last_name="Did3",
             email=u"john.did.cg.artist@gmail.com",
             role="user",
-            password=auth.encrypt_password("mypassword")
+            password=auth.encrypt_password("mypassword").decode()
         ).serialize()
         return self.user_cg_artist
 
@@ -513,7 +513,7 @@ class ApiDBTestCase(ApiTestCase):
             last_name=last_name,
             desktop_login=desktop_login,
             email=email,
-            password=auth.encrypt_password("mypassword")
+            password=auth.encrypt_password("mypassword").decode()
         )
         return self.person
 

@@ -19,7 +19,7 @@ class AuthTestCase(ApiDBTestCase):
 
         self.generate_fixture_person()
         self.person.update({
-            "password": auth.encrypt_password("secretpassword")
+            "password": auth.encrypt_password("secretpassword").decode()
         })
 
         self.person_dict = self.person.serialize()
@@ -40,7 +40,7 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_encrypt_password(self):
         password = "my secret"
-        pass_hash = auth.encrypt_password(password)
+        pass_hash = auth.encrypt_password(password).decode()
         self.assertGreater(len(pass_hash), len(password))
         self.assertNotEqual(pass_hash, password)
         self.assertTrue(bcrypt.check_password_hash(pass_hash, password))
@@ -75,7 +75,7 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_check_credentials(self):
         self.person.update({
-            "password": auth.encrypt_password("mypassword")
+            "password": auth.encrypt_password("mypassword").decode()
         })
         self.assertRaises(
             WrongPasswordException,
@@ -99,7 +99,7 @@ class AuthTestCase(ApiDBTestCase):
 
     def test_local_auth_strategy(self):
         self.person.update({
-            "password": auth.encrypt_password("mypassword")
+            "password": auth.encrypt_password("mypassword").decode()
         })
         self.assertRaises(
             WrongPasswordException,

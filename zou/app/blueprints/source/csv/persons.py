@@ -31,7 +31,7 @@ class PersonsCsvImportResource(BaseCsvImportResource):
             role = "user"
 
         try:
-            password = auth.encrypt_password("default")
+            password = auth.encrypt_password("default").decode()
             person = Person.get_by(email=email)
 
             if person is None:

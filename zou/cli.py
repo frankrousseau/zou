@@ -116,7 +116,7 @@ def create_admin(email, password):
         # Allow "admin@example.com" to be invalid.
         if email != "admin@example.com":
             auth.validate_email(email)
-        password = auth.encrypt_password(password)
+        password = auth.encrypt_password(password).decode()
         persons_service.create_person(
             email,
             password,
@@ -166,7 +166,7 @@ def set_default_password(email):
     "Set the password of given user as default"
     from zou.app.services import persons_service
     from zou.app.utils import auth
-    password = auth.encrypt_password("default")
+    password = auth.encrypt_password("default").decode()
     persons_service.update_password(email, password)
 
 

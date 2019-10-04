@@ -44,13 +44,13 @@ class ImportShotgunPersonsResource(BaseImportShotgunResource):
                 person = Person.get_by(email=data["email"])
 
             if person is None:
-                data["password"] = auth.encrypt_password("default")
+                data["password"] = auth.encrypt_password("default").decode()
                 person = Person(**data)
                 person.save()
                 current_app.logger.info("Person created: %s" % person)
             else:
                 if person.password is None or len(person.password) == 0:
-                    data["password"] = auth.encrypt_password("default")
+                    data["password"] = auth.encrypt_password("default").decode()
                 person.update(data)
                 current_app.logger.info("Person updated: %s" % person)
             return person

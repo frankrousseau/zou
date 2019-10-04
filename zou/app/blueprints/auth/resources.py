@@ -346,7 +346,7 @@ class RegistrationResource(Resource):
         try:
             email = auth.validate_email(email)
             auth.validate_password(password, password_2)
-            password = auth.encrypt_password(password)
+            password = auth.encrypt_password(password).decode()
             persons_service.create_person(
                 email,
                 password,
@@ -428,7 +428,7 @@ class ChangePasswordResource(Resource):
         try:
             auth_service.check_auth(app, get_jwt_identity(), old_password)
             auth.validate_password(password, password_2)
-            password = auth.encrypt_password(password)
+            password = auth.encrypt_password(password).decode()
             persons_service.update_password(get_jwt_identity(), password)
             return {"success": True}
 
@@ -492,7 +492,7 @@ class ResetPasswordResource(Resource, ArgsMixin):
             email = auth_tokens_store.get("reset-%s" % args["token"])
             if email:
                 auth.validate_password(args["password"], args["password2"])
-                password = auth.encrypt_password(args["password"])
+                password = auth.encrypt_password(args["password"]).decode()
                 persons_service.update_password(email, password)
                 auth_tokens_store.delete("reset-%s" % args["token"])
                 return {"success": True}
