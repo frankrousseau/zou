@@ -243,7 +243,10 @@ def get_shots_and_tasks(criterions={}):
         shot.data = shot.data or {}
 
         if shot_id not in shot_map:
-            shot_map[shot_id] = {
+
+            shot_map[shot_id] = shot.serialize()
+
+            shot_map[shot_id].update({
                 "id": str(shot.id),
                 "name": shot.name,
                 "description": shot.description,
@@ -261,7 +264,7 @@ def get_shots_and_tasks(criterions={}):
                 "tasks": [],
                 "project_id": str(project_id),
                 "project_name": project_name
-            }
+            })
 
         if task_id is not None:
             if task_id not in task_map:
