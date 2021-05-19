@@ -195,8 +195,6 @@ def update_preview_file_annotations(project_id, preview_file_id, annotations):
     import pprint
     pprint.pprint(annotations)
     preview_file = files_service.get_preview_file_raw(preview_file_id)
-    annotations = list(set(preview_file.annotations + annotations))
-    # pprint.pprint("2", annotations)
     preview_file.update({"annotations": annotations})
     events.emit(
         "preview-file:annotation-update",
