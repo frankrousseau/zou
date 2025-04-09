@@ -2,6 +2,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 
 
+from zou.app.services import budget_service
 from zou.app.mixin import ArgsMixin
 from zou.app.services import (
     projects_service,
@@ -1092,3 +1093,124 @@ class ProductionSequencesScheduleItemsResource(Resource):
         return schedule_service.get_sequences_schedule_items(
             project_id, task_type_id
         )
+
+
+class ProductionBudgetsResource(Resource):
+
+    @jwt_required()
+    def get(self, project_id):
+        """
+        Retrieve budgets for given production
+        ---
+        tags:
+          - Projects
+        parameters:
+          - in: path
+            name: project_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+        responses:
+            200:
+              description: All budgets of given production
+        """
+        user_service.check_manager_project_access(project_id)
+        return budget_service.get_budgets(project_id)
+
+
+    @jwt_required()
+    def post(self, project_id):
+        """
+        Create a budget for given production.
+        ---
+        tags:
+          - Projects
+        parameters:
+          - in: path
+            name: project_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+          - in: formData
+            name: name
+            required: true
+            type: string
+            default: "New Budget"
+        responses:
+            201:
+              description: Budget created
+        """
+        user_service.check_manager_project_access(project_id)
+        data = self.get_args(
+            "name", None, True
+        )
+        return budget_service.create_budget(project_id, data)
+
+class ProductionBudgetResource(Resource):
+    """
+    Resource to retrieve a budget for given production.
+    """
+
+    @jwt_required()
+    def get(self, project_id, budget_id):
+        """
+        Retrieve a budget for given production
+        ---
+        tags:
+          - Projects
+        parameters:
+          - in: path
+            name: project_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+          - in: path
+            name: budget_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+        responses:
+            200:
+              description: Budget retrieved
+        """
+        user_service.check_manager_project_access(project_id)
+        return budget_service.get_budget(budget_id)
+
+    @jwt_required()
+    def put(self, project_id, budget_id):
+        """
+        Update a budget name for given production
+        ---
+        tags:
+          - Projects
+        parameters:
+          - in: path
+            name: project_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+          - in: path
+            name: budget_id
+            required: true
+            type: string
+            format: UUID
+            x-example: a24a6ea4-ce75-4665-a070-57453082c25
+          - in: formData
+            name: name
+            required: true
+            type: string
+            default: "New Budget"
+        responses:
+            200:
+              description: Budget updated
+        """
+        user_service.check_manager_project_access(project_id)
+        data = self.get_args(
+            "name", None, True
+        )
+        return budget_service.update_budget(budget_id, data)

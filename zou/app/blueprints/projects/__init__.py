@@ -26,6 +26,8 @@ from zou.app.blueprints.projects.resources import (
     ProductionEpisodesScheduleItemsResource,
     ProductionSequencesScheduleItemsResource,
     ProductionTimeSpentsResource,
+    ProductionBudgetsResource,
+    ProductionBudgetResource,
 )
 
 routes = [
@@ -110,6 +112,11 @@ routes = [
         ProductionSequencesScheduleItemsResource,
     ),
     ("/data/projects/<project_id>/time-spents", ProductionTimeSpentsResource),
+    ("/data/projects/<project_id>/budgets", ProductionBudgetsResource),
+    (
+        "/data/projects/<project_id>/budgets/<budget_id>",
+        ProductionBudgetResource,
+    ),
 ]
 
 blueprint = Blueprint("projects", "projects")

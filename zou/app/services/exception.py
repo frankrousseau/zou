@@ -149,6 +149,10 @@ class MetadataDescriptorNotFoundException(NotFound):
     pass
 
 
+class BudgetNotFoundException(NotFound):
+    pass
+
+
 class MalformedFileTreeException(Exception):
     pass
 
