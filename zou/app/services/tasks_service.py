@@ -1194,16 +1194,15 @@ def create_tasks(task_type, entities):
     existing_tasks = Task.query.filter(
         Task.entity_id.in_(entity_ids), Task.task_type_id == task_type["id"]
     ).all()
-    # Normalize to str so comparison works when entity["id"] comes from JSON/serialize
     existing_entity_ids = {str(task.entity_id) for task in existing_tasks}
 
-    # Statut défini une fois : soit on crée pour des concepts, soit pour d'autres types
     task_status = get_default_status(
         for_concept=entities[0]["entity_type_id"]
         == concepts_service.get_concept_type()["id"]
     )
 
     tasks = []
+    task_status_map = {}
     for entity in entities:
         if str(entity["id"]) not in existing_entity_ids:
             task = Task.create_no_commit(
@@ -1223,10 +1222,12 @@ def create_tasks(task_type, entities):
                 assignees=[],
             )
             tasks.append(task)
+            task_status_map[task.id] = task_status
     Task.commit()
 
     task_dicts = []
     for task in tasks:
+        task_status = task_status_map[task.id]
         task_dict = _finalize_task_creation(task_type, task_status, task)
         task_dicts.append(task_dict)
 
